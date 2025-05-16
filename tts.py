@@ -28,12 +28,11 @@ def main():
     
     cosyvoice = CosyVoice2('pretrained_models/CosyVoice2-0.5B', load_jit=False, load_trt=False, fp16=False, use_flow_cache=False)
 
-    reference_audio_path = f"{args.work_dir}/{args.reference_speaker}"
-    logging.info(f"reference_audio_path {reference_audio_path}")
+    logging.info(f"reference_audio_path {args.reference_speaker}")
 
     # Transcribing the audio sample
     model = whisper.load_model("medium")
-    ref_audio_transcribe = model.transcribe(reference_audio_path)
+    ref_audio_transcribe = model.transcribe(args.reference_speaker)
 
     ref_sample_rate = 16000
 
@@ -54,14 +53,14 @@ def main():
 
     # Check if cross linugal or not
     if(args.src_language == args.target_language):
-        prompt_speech_16k = load_wav(reference_audio_path, ref_sample_rate)
+        prompt_speech_16k = load_wav(args.reference_speaker, ref_sample_rate)
 
         for phrase_input in texts_to_sythesize:
             for i, j in enumerate(cosyvoice.inference_zero_shot(phrase_input, ref_audio_transcribe['text'], prompt_speech_16k, stream=False)):
                 out_audio_path = f"{args.work_dir}/phrases/{i}_out.wav"
                 torchaudio.save(out_audio_path, j['tts_speech'], cosyvoice.sample_rate)
     else:
-        prompt_speech_16k = load_wav(reference_audio_path, ref_sample_rate)
+        prompt_speech_16k = load_wav(args.reference_speaker, ref_sample_rate)
 
         for phrase_input in texts_to_sythesize:
             for i, j in enumerate(cosyvoice.inference_cross_lingual(phrase_input, ref_audio_transcribe['text'], prompt_speech_16k, stream=False)):
