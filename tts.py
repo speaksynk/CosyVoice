@@ -1,0 +1,72 @@
+import os
+import sys
+import json
+import shutil
+import logging
+import argparse
+
+import torchaudio
+
+import whisper
+
+sys.path.append('third_party/Matcha-TTS')
+from cosyvoice.cli.cosyvoice import CosyVoice, CosyVoice2
+from cosyvoice.utils.file_utils import load_wav
+
+def options():
+    parser = argparse.ArgumentParser(description='Inference code to clone and drive text to speech')
+    parser.add_argument('--reference_speaker', '-r', type=str, required=True)
+    parser.add_argument('--src_language', '-s', type=str, required=True)
+    parser.add_argument('--target_language', '-t', type=str, required=True)
+    parser.add_argument('--work_dir', '-w', type=str, required=True)
+    args = parser.parse_args()
+    return args
+
+def main():
+    args = options()
+    logging.info(f"CosyVoice args {args}")
+    
+    cosyvoice = CosyVoice2('pretrained_models/CosyVoice2-0.5B', load_jit=False, load_trt=False, fp16=False, use_flow_cache=False)
+
+    reference_audio_path = f"{args.work_dir}/{args.reference_speaker}"
+    logging.info(f"reference_audio_path {reference_audio_path}")
+
+    # Transcribing the audio sample
+    model = whisper.load_model("medium")
+    ref_audio_transcribe = model.transcribe(reference_audio_path)
+
+    ref_sample_rate = 16000
+
+    # Get the text to synthesize
+    with open(f"{args.work_dir}/text.json", "r") as f:
+        phrases = json.load(f)
+
+    texts_to_sythesize = [phrase["translated"] for phrase in phrases if phrase['type'] == "phrase"]
+
+    logging.info(f"texts_to_sythesize {texts_to_sythesize}")
+
+    # Delete and recreate output folder
+    out_folder = f"{args.work_dir}/phrases/"
+    if os.path.exists(out_folder):
+        shutil.rmtree(out_folder)
+
+    os.mkdir(out_folder)
+
+    # Check if cross linugal or not
+    if(args.src_language == args.target_language):
+        prompt_speech_16k = load_wav(reference_audio_path, ref_sample_rate)
+
+        for phrase_input in texts_to_sythesize:
+            for i, j in enumerate(cosyvoice.inference_zero_shot(phrase_input, ref_audio_transcribe['text'], prompt_speech_16k, stream=False)):
+                out_audio_path = f"{args.work_dir}/phrases/{i}_out.wav"
+                torchaudio.save(out_audio_path, j['tts_speech'], cosyvoice.sample_rate)
+    else:
+        prompt_speech_16k = load_wav(reference_audio_path, ref_sample_rate)
+
+        for phrase_input in texts_to_sythesize:
+            for i, j in enumerate(cosyvoice.inference_cross_lingual(phrase_input, ref_audio_transcribe['text'], prompt_speech_16k, stream=False)):
+                out_audio_path = f"{args.work_dir}/phrases/{i}_out.wav"
+                torchaudio.save(out_audio_path, j['tts_speech'], cosyvoice.sample_rate)
+
+if __name__ == "__main__":
+    main()
