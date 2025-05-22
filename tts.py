@@ -53,6 +53,7 @@ def main():
 
     os.mkdir(out_folder)
 
+
     # Check if cross linugal or not
     if(args.src_language == args.target_language):
         prompt_speech_16k = load_wav(args.reference_speaker, ref_sample_rate)
@@ -63,7 +64,7 @@ def main():
             
             out_audio_path = None
             for i, j in enumerate(cosyvoice.inference_zero_shot(phrase["translated"], ref_audio_transcribe['text'], prompt_speech_16k, stream=False)):
-                out_audio_path = f"{args.work_dir}/phrases/{i}_out.wav"
+                out_audio_path = f"{args.work_dir}/phrases/{idx}_out.wav"
                 torchaudio.save(out_audio_path, j['tts_speech'], cosyvoice.sample_rate)
 
             phrases[idx]["file_path"] = out_audio_path
