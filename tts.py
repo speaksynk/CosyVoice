@@ -75,7 +75,7 @@ def main():
             if phrase['type'] != "phrase":
                 continue
 
-            for i, j in enumerate(cosyvoice.inference_cross_lingual(phrase["translated"], ref_audio_transcribe['text'], prompt_speech_16k, stream=False)):
+            for i, j in enumerate(cosyvoice.inference_cross_lingual(tts_text=phrase["translated"],prompt_speech_16k=prompt_speech_16k, stream=False)):
                 out_audio_path = f"{args.work_dir}/phrases/{idx}_out.wav"
                 torchaudio.save(out_audio_path, j['tts_speech'], cosyvoice.sample_rate)
 
