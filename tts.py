@@ -238,7 +238,7 @@ def main():
     else:
         prompt_speech_16k = load_wav(args.reference_speaker, ref_sample_rate)
 
-        for idx, phrase in enumerate(phrases):
+        for idx, phrase in enumerate(phrase_generation_info):
             if phrase['type'] != "phrase":
                 continue
 
@@ -246,7 +246,7 @@ def main():
                 out_audio_path = f"{args.work_dir}/phrases/{idx}_out.wav"
                 torchaudio.save(out_audio_path, j['tts_speech'], cosyvoice.sample_rate)
 
-            phrases[idx]["file_path"] = out_audio_path
+            phrase_generation_info[idx]["file_path"] = out_audio_path
 
             audio = whisper_ts.load_audio(out_audio_path)
 
@@ -259,11 +259,11 @@ def main():
             assert False
 
 
-    logging.info(f"Phrases {phrases}")
+    print(f"phrase_generation_info {phrase_generation_info}")
 
 
     with open(f"{args.work_dir}/text.json", "w") as f:
-        json.dump(phrases, f)
+        json.dump(phrase_generation_info, f)
 
 if __name__ == "__main__":
     main()
