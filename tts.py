@@ -261,6 +261,8 @@ def main():
 
     print(f"phrase_generation_info {phrase_generation_info}")
 
+    assert phrase_generation_info is not None
+
 
     with open(f"{args.work_dir}/text.json", "w") as f:
         json.dump(phrase_generation_info, f)
