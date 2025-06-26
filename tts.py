@@ -140,6 +140,16 @@ def main():
 
                     foundStart = True
 
+                    if len(phrases) == 0:
+                        out_audio_path = f"{args.work_dir}/phrases/{gen_phrase_count}.wav"
+
+                        audio_without_prepend = song[cut_start_time * 1000 : ]
+                        audio_without_prepend.export(out_audio_path, format="wav")
+
+                        phrase_generation_info[p['og_idx']]["file_path"] = out_audio_path
+                        break
+
+
                     # print(f"time_one {time_one} time_two {time_two} cut_time {cut_time}")
                     
                 elif i > 0 and len(phrases) > 0 and current_word == next_phrase_first:
