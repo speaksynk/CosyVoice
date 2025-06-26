@@ -20,7 +20,7 @@ import whisper_timestamped as whisper_ts
 
 ENGLISH_PREPEND = "test hey,"
 
-PERCENT_CUT_BACK = .2
+PERCENT_CUT_BACK = .5
 
 def options():
     parser = argparse.ArgumentParser(description='Inference code to clone and drive text to speech')
@@ -112,6 +112,8 @@ def main():
             gen_phrase_count = 0
             cut_start_time = None
 
+            p=None
+
             for i, word in enumerate(all_word_info):
 
                 current_word = word['text'].lower()
@@ -123,18 +125,18 @@ def main():
                 if not foundStart and i > 0 and current_word == first_real_word:
                     print(f"FOUND Start")
 
-                    time_two = all_word_info[i - 1]['end']
-                    time_one = word['start']
+                    time_one = all_word_info[i - 1]['end']
+                    time_two = word['start']
 
                     diff = time_two - time_one
 
-                    cut_time = time_one - 0.06
+                    cut_time = time_one + (diff * (1 - PERCENT_CUT_BACK))
 
                     print(f"cut_time {cut_time}")
 
                     cut_start_time = cut_time
 
-                    phrases.pop(0)
+                    p = phrases.pop(0)
 
                     foundStart = True
 
@@ -155,7 +157,8 @@ def main():
                     audio_without_prepend = song[cut_start_time * 1000 : cut_end_time * 1000]
                     audio_without_prepend.export(out_audio_path, format="wav")
 
-                    phrase_generation_info[phrases[0]['og_idx']]["file_path"] = out_audio_path
+                    
+                    phrase_generation_info[p['og_idx']]["file_path"] = out_audio_path
                     # found = True
 
                     cut_start_time = cut_end_time
