@@ -249,7 +249,7 @@ def main():
               
 
     else:
-         prompt_speech_16k = load_wav(args.reference_speaker, ref_sample_rate)
+        prompt_speech_16k = load_wav(args.reference_speaker, ref_sample_rate)
 
         for idx, phrase in enumerate(phrase_generation_info):
             if phrase['type'] != "phrase":
