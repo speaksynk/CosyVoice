@@ -261,16 +261,6 @@ def main():
 
             phrase_generation_info[idx]["file_path"] = out_audio_path
 
-            audio = whisper_ts.load_audio(out_audio_path)
-
-            model = whisper_ts.load_model("tiny", device="cpu")
-
-            result = whisper_ts.transcribe(model, audio, language=args.target_language.lower())
-
-            print(json.dumps(result, indent = 2, ensure_ascii = False))
-
-            assert False
-
 
     print(f"phrase_generation_info {phrase_generation_info}")
 
