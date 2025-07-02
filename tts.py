@@ -122,20 +122,23 @@ def main():
                 print(f"current_word {current_word} next_phrase_first {next_phrase_first}")
 
                 # print(f"word['text'] {word['text'].lower()}; all_word_info[i + 1]['text'] {all_word_info[i + 1]['text'].lower()}")
-                if not foundStart and i > 0 and current_word == first_real_word:
+                if not foundStart and current_word == first_real_word:
                     print(f"FOUND Start")
 
-                    time_one = all_word_info[i - 1]['end']
-                    time_two = word['start']
+                    if i > 0:
+                        time_one = all_word_info[i - 1]['end']
+                        time_two = word['start']
 
-                    diff = time_two - time_one
+                        diff = time_two - time_one
 
-                    cut_time = time_one + (diff * (1 - PERCENT_CUT_BACK))
+                        cut_time = time_one + (diff * (1 - PERCENT_CUT_BACK))
 
-                    print(f"cut_time {cut_time}")
+                        print(f"cut_time {cut_time}")
 
-                    cut_start_time = cut_time
-
+                        cut_start_time = cut_time
+                    else:
+                        cut_start_time = word['start']
+                        
                     p = phrases.pop(0)
 
                     foundStart = True
@@ -201,7 +204,7 @@ def main():
                     out_audio_path_temp = f"{args.work_dir}/phrases/{idx}_out.temp.wav"
                     torchaudio.save(out_audio_path_temp, j['tts_speech'], cosyvoice.sample_rate)
 
-                # phrases[idx]["file_path"] = out_audio_path
+                phrase_generation_info[idx]["file_path"] = out_audio_path
 
                 # if args.target_language == "English":
                 #     audio = whisper_ts.load_audio(out_audio_path_temp)
