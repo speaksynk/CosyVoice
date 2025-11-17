@@ -61,7 +61,8 @@ def main():
         model = CosyVoice(args.model_dir)
     except Exception:
         try:
-            model = CosyVoice2(args.model_dir)
+            # NOTE set use_flow_cache=True when export jit for cache inference
+            model = CosyVoice2(args.model_dir, use_flow_cache=True)
         except Exception:
             raise TypeError('no valid model_type!')
 
@@ -92,9 +93,9 @@ def main():
     else:
         # 3. export flow encoder
         flow_encoder = model.model.flow.encoder
-        script = get_optimized_script(flow_encoder)
+        script = get_optimized_script(flow_encoder, ['forward_chunk'])
         script.save('{}/flow.encoder.fp32.zip'.format(args.model_dir))
-        script = get_optimized_script(flow_encoder.half())
+        script = get_optimized_script(flow_encoder.half(), ['forward_chunk'])
         script.save('{}/flow.encoder.fp16.zip'.format(args.model_dir))
         logging.info('successfully export flow_encoder')
 

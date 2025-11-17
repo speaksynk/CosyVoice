@@ -122,5 +122,4 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.warning('this code has been deprecated, please refer to README for CosyVoice inference usage!')
     main()
